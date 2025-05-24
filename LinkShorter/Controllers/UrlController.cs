@@ -22,11 +22,26 @@ namespace LinkShorter.Presentation.Controllers
         }
         public async Task<IActionResult> Index(int page = 1, int pageSize = DefaultPageSize)
         {
+            if (page < 1)
+            {
+                ModelState.AddModelError("page", "Номер страницы не может быть меньше 1.");
+            }
+
+            if (pageSize < 1)
+            {
+                ModelState.AddModelError("pageSize", "Размер страницы должен быть больше 0.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View((Enumerable.Empty<UrlPl>(), _absoluteUri));
+            }
+
             var data = await _urlService.GetPagedDataAsync(page, pageSize);
             var result = _mapper.Map<IEnumerable<UrlBl>, IEnumerable<UrlPl>>(data);
-
             return View((result, _absoluteUri));
         }
+
 
         [HttpGet]
         public async Task<IActionResult> EditCreatePressAsync(int id)
